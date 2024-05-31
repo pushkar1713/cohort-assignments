@@ -13,7 +13,7 @@ router.post("/signup", async (req, res) => {
     username: username,
     password: password,
   });
-
+  console.log(newUser);
   res.json({
     msg: "user created sucessfully",
   });
@@ -27,12 +27,12 @@ router.get("/courses", async (req, res) => {
   });
 });
 
-router.post("/courses/:courseId", userMiddleware, (req, res) => {
+router.post("/courses/:courseId", userMiddleware, async (req, res) => {
   // Implement course purchase logic
   const courseID = req.params.courseId;
   const username = req.headers.username;
 
-  User.updateOne(
+  await User.updateOne(
     {
       username: username,
     },
@@ -47,8 +47,22 @@ router.post("/courses/:courseId", userMiddleware, (req, res) => {
   });
 });
 
-router.get("/purchasedCourses", userMiddleware, (req, res) => {
+router.get("/purchasedCourses", userMiddleware, async (req, res) => {
   // Implement fetching purchased courses logic
+  const user = await User.findOne({
+    username: req.headers.username,
+  });
+
+  console.log(user.purchasedCourses);
+  const courses = await Course.find({
+    _id: {
+      $in: user.purchasedCourses,
+    },
+  });
+
+  res.json({
+    courses: courses,
+  });
 });
 
 module.exports = router;
